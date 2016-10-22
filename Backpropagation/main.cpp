@@ -21,7 +21,7 @@ public:
 	}
 
 	double calculate_total_net_input() {
-		double total = 0.0;
+		auto total = 0.0;
 		for (std::size_t i = 0; i < inputs.size(); ++i) {
 			total += inputs[i] * weights[i];
 		}
@@ -94,7 +94,7 @@ public:
 	explicit NeuronLayer(std::size_t num_neurons, double bias = 0.0) {
 
 		// Every neuron in a layer shares the same bias
-		this->bias = bias ? bias : (rand()/(double)(RAND_MAX + 1));;
+		this->bias = bias ? bias : rand()/static_cast<double>(RAND_MAX + 1);;
 
 		neurons.reserve(num_neurons);
 		for (std::size_t i = 0; i < num_neurons; ++i) {
@@ -155,11 +155,11 @@ public:
 		for (auto& hidden_neuron : hidden_layer) {
 			for (std::size_t i = 0; i < num_inputs; ++i) {
 				if (hidden_layer_weights.empty()) {
-					hidden_neuron.weights.push_back(rand()/(double)(RAND_MAX + 1));
+					hidden_neuron.weights.push_back(rand()/static_cast<double>(RAND_MAX + 1));
 				} else {
 					hidden_neuron.weights.push_back(hidden_layer_weights[weight_num]);
 				}
-				weight_num += 1;
+				weight_num += 1.0;
 			}
 		}
 	}
@@ -169,11 +169,11 @@ public:
 		for (auto& output_neuron : output_layer) {
 			for (std::size_t i = 0; i < hidden_layer.neurons.size(); ++i) {
 				if (output_layer_weights.empty()) {
-					output_neuron.weights.push_back(rand()/(double)(RAND_MAX + 1));
+					output_neuron.weights.push_back(rand()/static_cast<double>(RAND_MAX + 1));
 				} else {
 					output_neuron.weights.push_back(output_layer_weights[weight_num]);
 				}
-				weight_num += 1;
+				weight_num += 1.0;
 			}
 		}
 	}
