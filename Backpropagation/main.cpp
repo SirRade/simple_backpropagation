@@ -21,7 +21,7 @@ public:
 	}
 
 	double calculate_total_net_input() {
-		double total = 0;
+		double total = 0.0;
 		for (std::size_t i = 0; i < inputs.size(); ++i) {
 			total += inputs[i] * weights[i];
 		}
@@ -94,11 +94,11 @@ public:
 	explicit NeuronLayer(std::size_t num_neurons, double bias = 0.0) {
 
 		// Every neuron in a layer shares the same bias
-		this->bias = bias ? bias : rand() % RAND_MAX;
+		this->bias = bias ? bias : (rand()/(double)(RAND_MAX + 1));;
 
 		neurons.reserve(num_neurons);
 		for (std::size_t i = 0; i < num_neurons; ++i) {
-			neurons.push_back(Neuron(bias));
+			neurons.push_back(Neuron(this->bias));
 		}
 	}
 
@@ -131,6 +131,7 @@ public:
 	std::size_t num_inputs = 0;
 	NeuronLayer hidden_layer;
 	NeuronLayer output_layer;
+	using training_set_t = std::vector<std::vector<double>>;
 
 public:
 	NeuralNetwork(
@@ -154,7 +155,7 @@ public:
 		for (auto& hidden_neuron : hidden_layer) {
 			for (std::size_t i = 0; i < num_inputs; ++i) {
 				if (hidden_layer_weights.empty()) {
-					hidden_neuron.weights.push_back(rand() % RAND_MAX);
+					hidden_neuron.weights.push_back(rand()/(double)(RAND_MAX + 1));
 				} else {
 					hidden_neuron.weights.push_back(hidden_layer_weights[weight_num]);
 				}
@@ -168,7 +169,7 @@ public:
 		for (auto& output_neuron : output_layer) {
 			for (std::size_t i = 0; i < hidden_layer.neurons.size(); ++i) {
 				if (output_layer_weights.empty()) {
-					output_neuron.weights.push_back(rand() % RAND_MAX);
+					output_neuron.weights.push_back(rand()/(double)(RAND_MAX + 1));
 				} else {
 					output_neuron.weights.push_back(output_layer_weights[weight_num]);
 				}
@@ -183,11 +184,11 @@ public:
 	}
 
 	// Uses online learning, ie updating the weights after each training case
-	void train(std::vector<double> training_inputs, std::vector<double> training_outputs) {
+	void train(const std::vector<double> & training_inputs, const std::vector<double> & training_outputs) {
 		feed_forward(training_inputs);
 
 		// 1. Output neuron deltas
-		std::vector<size_t> pd_errors_wrt_output_neuron_total_net_input(output_layer.neurons.size());
+		std::vector<double> pd_errors_wrt_output_neuron_total_net_input(output_layer.neurons.size());
 		for (std::size_t o = 0; o < output_layer.neurons.size(); ++o) {
 
 			// ∂E / ∂zⱼ
@@ -231,12 +232,11 @@ public:
 	}
 
 
-	auto calculate_total_error(std::vector<std::vector<double>>training_sets) {
+	auto calculate_total_error(const std::vector<training_set_t> & training_sets) {
 		auto total_error = 0.0;
 		for (std::size_t t = 0; t < training_sets.size(); ++t) {
-			std::vector<double> training_inputs;
-			std::vector<double> training_outputs;
-			training_inputs = training_outputs = training_sets[t];
+			auto training_inputs = training_sets[t].front();
+			auto training_outputs = training_sets[t].back();
 
 			feed_forward(training_inputs);
 			for (std::size_t o = 0; o < training_outputs.size(); ++o) {
@@ -251,14 +251,16 @@ public:
 
 int main() {
 	srand(time(nullptr));
-
-	auto nn = NeuralNetwork(2, 2, 2, 
-	{0.15, 0.2, 0.25, 0.3}, 
-	0.35, 
-	{0.4, 0.45, 0.5, 0.55},
-	0.6);
+	auto nn = NeuralNetwork(
+		2, 2, 2, 
+		{0.15, 0.2, 0.25, 0.3}, 
+		0.35, 
+		{0.4, 0.45, 0.5, 0.55},
+		0.6
+	);
+	std::cout.precision(9);
 	for (std::size_t i = 0; i < 10'000; ++i) {
 		nn.train({0.05, 0.1}, {0.01, 0.99});
-		std::cout << i << ":" << nn.calculate_total_error({{{0.05, 0.1}, {0.01, 0.99}}}) << '\n';
+		std::cout << i << " " << nn.calculate_total_error({{{0.05, 0.1}, {0.01, 0.99}}}) << '\n';
 	}
 }
