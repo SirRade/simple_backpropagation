@@ -138,10 +138,10 @@ public:
 		std::size_t num_inputs, 
 		std::size_t num_hidden, 
 		std::size_t num_outputs, 
-		const std::vector<double> & hidden_layer_weights, 
-		double hidden_layer_bias,
-		const std::vector<double> & output_layer_weights, 
-		double output_layer_bias
+		const std::vector<double> & hidden_layer_weights = {},
+		double hidden_layer_bias = {},
+		const std::vector<double> & output_layer_weights = {},
+		double output_layer_bias = {}
 	) : num_inputs(num_inputs),
 		hidden_layer(num_hidden, hidden_layer_bias),
 		output_layer(num_outputs, output_layer_bias)
@@ -252,11 +252,12 @@ public:
 int main() {
 	srand(time(nullptr));
 	auto nn = NeuralNetwork(
-		2, 2, 2, 
-		{0.15, 0.2, 0.25, 0.3}, 
+		2, 2, 2/*,
+		{0.15, 0.2, 0.25, 0.3},		
 		0.35, 
 		{0.4, 0.45, 0.5, 0.55},
 		0.6
+		*/
 	);
 	std::cout.precision(9);
 	for (std::size_t i = 0; i < 10'000; ++i) {
